@@ -34,6 +34,11 @@ class CustomAgentCommandManager(AgentCommandManager):
         """Command the vehicle to take off to a specified altitude."""
         self.send_takeoff_command(altitude)
 
+    #Function to land
+    def landing(self):
+        """Command the vehicle to land."""
+        self.send_land_command()
+
     # Function to move to a target position (local NED frame)
     def move(self, x, y, z=None):
         """Move the vehicle to a relative position (x, y, z)."""
@@ -69,3 +74,4 @@ class CustomAgentCommandManager(AgentCommandManager):
         """Start the mission."""
         self.send_start_mission_command()
 
+    

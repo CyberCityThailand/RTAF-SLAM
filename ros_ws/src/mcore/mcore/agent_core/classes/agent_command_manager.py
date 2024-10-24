@@ -439,6 +439,31 @@ class AgentCommandManager:
             0,
             0
         )
+
+
+    def send_land_command(self):
+        """Sends the land command to the vehicle."""
+        self.vprint("Initiating landing")
+
+        if self._mav_connection is not None:
+            self._mav_connection.mav.command_long_send(
+                self._mav_connection.target_system,
+                self._mav_connection.target_component,
+                mavutil.mavlink.MAV_CMD_NAV_LAND,  # Command for landing
+                0,  # Confirmation
+                0, 0, 0, 0,  # Param1-4: Unused
+                0,  # Latitude (optional, 0 to use current position)
+                0,  # Longitude (optional, 0 to use current position)
+                0   # Altitude (optional, 0 for immediate descent)
+            )
+            msg = self._mav_connection.recv_match(type='COMMAND_ACK', blocking=True, timeout=3.0)
+            self.vprint(f"The message is: {msg}")
+        else:
+            self.vprint("No MAVLink connection")
+
+        self._agent_hub.immediate_response_queue.put(True)
+
+        
         # msg = self._mav_connection.recv_match(
         #     type='COMMAND_ACK',
         #     blocking=True,
@@ -450,30 +475,30 @@ class AgentCommandManager:
         #     return False
 
         
-    def set_rc_channel_pwm(self, channel_id, pwm=1550):
-        """Set RC channel pwn value
-        Arguments:
-            - channel_id (int): Servo Channel ID
-            - pwm(int, optional): Channel pwm 0%-100% values are 1000-2000
-            -- best practice is to set the pwm values between 1100-1900
-            -- value of 0 means hand it back to handheld controller
-            -- value of UINT16_MAX (65535) means ignore the channel
+    # def set_rc_channel_pwm(self, channel_id, pwm=1550):
+    #     """Set RC channel pwn value
+    #     Arguments:
+    #         - channel_id (int): Servo Channel ID
+    #         - pwm(int, optional): Channel pwm 0%-100% values are 1000-2000
+    #         -- best practice is to set the pwm values between 1100-1900
+    #         -- value of 0 means hand it back to handheld controller
+    #         -- value of UINT16_MAX (65535) means ignore the channel
 
-        """
+    #     """
 
-        # check for valid input channel
-        if channel_id < 1 or channel_id > 18:
-            print("Channel does not exist")
-            return
+    #     # check for valid input channel
+    #     if channel_id < 1 or channel_id > 18:
+    #         print("Channel does not exist")
+    #         return
 
-        # Mavlink 2 supports up to 18 channels:
-        # https://mavlink.io/en/messages/common.html#RC_CHANNELS_OVERRIDE
-        # Initialize all the channels to UINT16_MAX which tells mavlink the channel is unused
-        rc_channel_values = [65535 for _ in range(18)]
-        rc_channel_values[channel_id - 1] = pwm
-        self._mav_connection.mav.rc_channels_override_send(
-            self._mav_connection.target_system,
-            self._mav_connection.target_component,
-            *rc_channel_values
-        )
+    #     # Mavlink 2 supports up to 18 channels:
+    #     # https://mavlink.io/en/messages/common.html#RC_CHANNELS_OVERRIDE
+    #     # Initialize all the channels to UINT16_MAX which tells mavlink the channel is unused
+    #     rc_channel_values = [65535 for _ in range(18)]
+    #     rc_channel_values[channel_id - 1] = pwm
+    #     self._mav_connection.mav.rc_channels_override_send(
+    #         self._mav_connection.target_system,
+    #         self._mav_connection.target_component,
+    #         *rc_channel_values
+    #     )
 

@@ -28,7 +28,7 @@ class Agent(AgentCore):
         print("6. Go to GPS Coordinates")
         print("7. Change Speed")
         print("8. Rotate (Yaw)")
-        print("9. Start Mission")
+        print("9. Land")
         print("0. Exit")
 
         choice = input("Enter the number of the action you want to perform: ").strip()
@@ -82,8 +82,8 @@ class Agent(AgentCore):
             command_manager.yaw(angle, clockwise=clockwise)
 
         elif choice == '9':
-            # Start mission
-            command_manager.start_mission()
+            # Land
+            command_manager.landing()
 
         elif choice == '0':
             print("Exiting program.")
