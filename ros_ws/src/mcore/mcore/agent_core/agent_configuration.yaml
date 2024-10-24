@@ -1,0 +1,100 @@
+AGENT_ID: 80102
+SYS_ID: 1
+  
+COMMANDS:
+  arm: mm_send_cmd_to_flightcontroller
+  disarm: mm_send_cmd_to_flightcontroller
+  launch: mm_send_cmd_to_flightcontroller
+  FLIGHT_MODE_RTL: set_rtl_mode
+  FLIGHT_MODE_STABILIZE: set_stabilize_mode
+  FLIGHT_MODE_AUTO: set_auto_mode
+
+ARM_STATUS:
+  0: STBY # waiting for position quality to allow arming
+  1: DISARM
+  2: ARM
+  3: LAUNCH
+
+FLIGHT_MODES:
+  STABILIZE: 0
+  ACRO: 1
+  ALT_HOLD: 2
+  AUTO: 3
+  GUIDED: 4
+  LOITER: 5
+  RTL: 6
+  CIRCLE: 7
+  POSITION: 8
+  LAND: 9
+  OF_LOITER: 10
+  DRIFT: 11
+  SPORT: 13
+  FLIP: 14
+  AUTOTUNE: 15
+  POSHOLD: 16
+  BRAKE: 17
+  THROW: 18
+  AVOID_ADSB: 19
+  GUIDED_NOGPS: 20
+  SMART_RTL: 21
+  FLOWHOLD: 22
+  FOLLOW: 23
+  ZIGZAG: 24
+  SYSTEMID: 25
+  AUTOROTATE: 26
+  AUTO_RTL: 27
+
+BAUD_RATE: 115200 #9600
+
+### NETWORK PARAMETERS ###
+### agent server port is the port that the worker sends immediate responses back
+### to when the agent requests an immediate reponse
+AGENT_SERVER_PORT: 5950
+
+
+### SIMULATOR ADDRESSES ###
+
+## C:\"Program Files (x86)\MAVProxy"\mavproxy.exe --master=tcp:127.0.0.1:5760 --out=udp:127.0.0.1:14550 --out=udpout:127.0.0.1:14551 --streamrate=-1 --console
+## C:\"Program Files (x86)\MAVProxy"\mavproxy.exe --out=udp:127.0.0.1:14550 --out=udp:127.0.0.1:14551 --streamrate=-1 --console
+
+### SIMULATOR_ADDRESS is where you would connect in from the mavlink_connection to get SITL data
+SIMULATOR_ADDRESS: 'udpin:127.0.0.1:14551'
+# SIMULATOR_ADDRESS: 'udpin:10.1.10.29:14551'
+
+### Worker communication parameters (address and ports) ###
+# HEARTBEAT_REPLY_PORT is where the listener responds to heartbeats from a given worker
+# COMAND_PUBLISHER_PORT is where this device listens for published messages from a given worker
+WORKERS:
+  UI_WORKER:
+    # IP: '192.168.1.75'
+    # IP: '10.1.10.29'
+    IP: 'localhost'
+    HEARTBEAT_REPLY_PORT: '5556'
+    COMMAND_PUBLISHER_PORT: '5557'
+  # RADAR_WORKER:
+  #   IP: 'localhost'
+  #   HEARTBEAT_REPLY_PORT: '5558'
+  #   COMMAND_PUBLISHER_PORT: '5559'
+
+# HEARTBEAT TO CUBE LOST_COMM SETTINGS
+CUBE_LOST_COMM_LIMIT: 7  # Time since last heartbeat that the agent.py code shows lost connection with Cube
+
+# HEARTBEAT TO WORKER LOST_COMM SETTINGS
+BASE_HEARTBEAT: 1                 # After a receiving 'ack' start heartbeat count back to this
+BASE_HEARTBEAT_WAIT_TIME_SEC: 0.2 # Timer time to wait to send subsequent heartbeat
+                                  # The timer resets after heartbeat is sent or after 'ack' if received
+HEARTBEAT_COUNT_FAIL_LIMIT: 15    # Triggers lost comm message to agent.py if received this many failed heartbeats in a row
+
+MESSAGE_INTERVALS:  # in microseconds for Cube ... but will likely be slower over tcp/udp with simulator
+  HEARTBEAT:          
+    ID: 0
+    INTERVAL: 10000
+    LOG_INTERVAL: 0
+  SYS_STATUS:        
+    ID: 1
+    INTERVAL: 100000
+    LOG_INTERVAL: 1000000
+  GLOBAL_POSITION_INT:          
+    ID: 33
+    INTERVAL: 100000
+    LOG_INTERVAL: 500000
