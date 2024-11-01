@@ -20,7 +20,7 @@ class Obeject_Avoidance(Node):
         )
 
         self.odom_sub = self.create_subscription(
-            LaserScan, "odom_rf2o", self.scan_cb, 10
+            Odomertry, "odom_rf2o", self.scan_cb, 10
         )
 
         self.out = Twist()
