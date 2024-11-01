@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             "mallanoo_agent = mcore.mallanoo_agent:main",
+            "avoidance_node = mcore.object_avoidance:main",
         ],
     },
 )
