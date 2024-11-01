@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            "mallanoo_agent = mcore.mallanoo_agent:main",
         ],
     },
 )
