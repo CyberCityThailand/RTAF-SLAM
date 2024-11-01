@@ -82,7 +82,7 @@ class Operation(Node):
 
         self.sem.acquire()
         input("Ready to move ?")
-        self.controller.move(x=3,y=3)
+        self.controller.move(x=3,y=3,z=3)
         time.sleep(5)
         self.sem.release()
 

@@ -204,37 +204,27 @@ class AgentCommandManager:
         #     return False
     
     #Writer Chanon Mallanoo
-    def send_move_command(self, x=10, y=0, z=current_altitude):
+    def send_move_command(self, x=0, y=0, z=0):
         
         self._mav_connection.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(10, self._mav_connection.target_system, self._mav_connection.target_component, 
-                                                                                      mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED, int(0b110111000000), 
-                                                                                      x,
-                                                                                      y,
-                                                                                      z,
-                                                                                      5, 0, 0,
-                                                                                      0, 0, 0,
-                                                                                      0, 0))
-    #message SET_POSITION_TARGET_LOCAL_NED 0 0 0 9 3527 0 0 0 1 0 0 0 0 0 0 0
-    def send_move_command2(self, x=10, y=0, z=current_altitude):
-        
-        self._mav_connection.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(10, self._mav_connection.target_system, self._mav_connection.target_component, 
-                                                                                      mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED, 3527, 
-                                                                                      0,
-                                                                                      0,
-                                                                                      0,
-                                                                                      20, 0, 0,
-                                                                                      0, 0, 0,
-                                                                                      0, 0))
+                                                                                      mavutil.mavlink.MAV_FRAME_BODY_FRD, int(0b110111111000), 
+                                                                                      x, #Forward
+                                                                                      y, #Left
+                                                                                      z, #Down Altitude is negative in NED
+                                                                                      0, 0, 0, #XYZ Velocity
+                                                                                      0, 0, 0, #XYZ Acceleration
+                                                                                      0, 0)) #Yaw setpoint and Yaw rate setpoint
+    
         
     
-    def send_new_speed(self, speed=20):
+    def send_new_speed(self, speed=3):
         
         self._mav_connection.mav.command_long_send(self._mav_connection.target_system, self._mav_connection.target_component, 
                                                                                       mavutil.mavlink.MAV_CMD_DO_CHANGE_SPEED, 
                                                                                       0,
-                                                                                      0,
-                                                                                      speed,
-                                                                                      0,
+                                                                                      0, #Param 1
+                                                                                      speed, #Speed -1:No change, -2 Return to default speed
+                                                                                      -1, #Throttle -1:No change, -2 Return to default speed
                                                                                       0,
                                                                                       0,
                                                                                       0,
@@ -244,52 +234,21 @@ class AgentCommandManager:
 
     #Writer Chanon Mallanoo
     def send_yaw_command(self, angle=45):
-        global current_position, current_altitude
         self._mav_connection.mav.command_long_send(
             self._mav_connection.target_system,
             self._mav_connection.target_component,
             mavutil.mavlink.MAV_CMD_CONDITION_YAW,
             0,
-            angle,
-            25,     #omega deg/sec 
-            0,
-            1,      #0 for Absolute Angle, 1 for Relative
+            angle,  #1 Angle
+            25,     #2 omega deg/sec 
+            0,      #3 -1:CCW 0:Shortest Distance 1:CW
+            1,      #4 0 for Absolute Angle, 1 for Relative offset
             0,
             0,
             0
         )
     
-    def send_yaw_command_CW(self, angle=45):
-        global current_position, current_altitude
-        self._mav_connection.mav.command_long_send(
-            self._mav_connection.target_system,
-            self._mav_connection.target_component,
-            mavutil.mavlink.MAV_CMD_CONDITION_YAW,
-            0,
-            angle,
-            25,     #omega deg/sec 
-            1,
-            1,      #0 for Absolute Angle, 1 for Relative
-            0,
-            0,
-            0
-        )
-
-    def send_yaw_command_CCW(self, angle=45):
-        global current_position, current_altitude
-        self._mav_connection.mav.command_long_send(
-            self._mav_connection.target_system,
-            self._mav_connection.target_component,
-            mavutil.mavlink.MAV_CMD_CONDITION_YAW,
-            0,
-            angle,
-            25,     #omega deg/sec 
-            -1,
-            1,      #0 for Absolute Angle, 1 for Relative
-            0,
-            0,
-            0
-        )
+    
 
 
     # def send_goto_command(self, target):
