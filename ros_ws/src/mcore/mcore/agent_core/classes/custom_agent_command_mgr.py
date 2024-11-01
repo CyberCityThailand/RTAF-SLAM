@@ -40,10 +40,8 @@ class CustomAgentCommandManager(AgentCommandManager):
         self.send_land_command()
 
     # Function to move to a target position (local NED frame)
-    def move(self, x, y, z=None):
+    def move(self, x, y, z=0):
         """Move the vehicle to a relative position (x, y, z)."""
-        if z is None:
-            z = self.agent_status_obj.current_altitude  # Use current altitude if not provided
         self.send_move_command(x, y, z)
 
     # Function to change speed
@@ -52,12 +50,9 @@ class CustomAgentCommandManager(AgentCommandManager):
         self.send_new_speed(speed)
 
     # Function to rotate to a specific yaw angle
-    def yaw(self, angle, clockwise=True):
+    def yaw(self, angle):
         """Rotate the vehicle to a specified yaw angle. Clockwise by default."""
-        if clockwise:
-            self.send_yaw_command_CW(angle)
-        else:
-            self.send_yaw_command_CCW(angle)
+       self.send_yaw_command(angle)
 
     # Function to move to a specific GPS coordinate
     def goto(self, latitude, longitude, altitude=None):

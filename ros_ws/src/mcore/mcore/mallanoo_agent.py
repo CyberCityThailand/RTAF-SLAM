@@ -42,11 +42,12 @@ class Controller(AgentCore):
         self.command_manager.takeoff(altitude)
 
     # Function to move to a target position (local NED frame)
-    def move(self, x, y, z=None):
+    # X is Forward Y is Left Z is Down (So provide negative value to go up)
+    def move(self, x, y, z=0):
         self.command_manager.move(x, y, z)
 
-    def yaw(self, angle=45, clockwise=True):
-        self.command_manager.yaw(angle, clockwise=True)
+    def yaw(self, angle=45):
+        self.command_manager.yaw(angle)
 
     #Function to land
     def land(self):
@@ -64,49 +65,71 @@ class Operation(Node):
         self.controller = Controller()
         self.sem = threading.Semaphore()
 
-        # self.sem.acquire()
-        # self.controller.arm()
-        # time.sleep(5)
-        # self.sem.release()
+        print("---Command Precheck---")
+        isPrechecked = input("Do you want to do precheck?")
+        if (isPrechecked != '0'):
+            self.sem.acquire()
+            input("Set mode GUIDED")
+            self.controller.set_mode_guided()
 
-        # self.sem.acquire()
-        # self.controller.set_mode_guided()
-        # print("Mode Changed")
-        # time.sleep(5)
-        # self.sem.release()
+            if (self.controller.agent_status_obj.flight_mode != 'GUIDED'):
+                input("Cannot change to Mode Guided")
 
-        self.sem.acquire()
-        self.controller.takeoff(3)
-        time.sleep(5)
-        self.sem.release()
+            input("Press any keys to takeoff")
+            self.controller.takeoff(3)
+            time.sleep(5)
+            self.sem.release()
 
-        self.sem.acquire()
-        input("Ready to move ?")
-        self.controller.move(x=3,y=3,z=3)
-        time.sleep(5)
-        self.sem.release()
+            self.sem.acquire()
+            input("Ready to move ?")
+            self.controller.move(x=3,y=3,z=0)
+            input("Mode Guided?")
+            self.controller.set_mode_guided()
+            time.sleep(3)
+            self.sem.release()
 
-        self.sem.acquire()
-        input("Ready to yaw ?")
-        self.controller.yaw()
-        time.sleep(5)
-        self.sem.release()
+            self.sem.acquire()
+            input("Ready to yaw ?")
+            self.controller.yaw()
+            time.sleep(5)
+            self.sem.release()
 
-        self.sem.acquire()
-        input("Ready to land ?")
-        self.controller.land()
-        time.sleep(5)
-        self.sem.release()
+            self.sem.acquire()
+            input("Ready to land ?")
+            self.controller.land()
+            time.sleep(5)
+            self.sem.release()
+        else:
+            print("Mission started")
+            print("Taking movement from cmd_vel")
         
 
 
 
     def callback_cmd(self, twist: Twist):
         
-        print("Moving")
-
+        print("---Ready to Move---")
         forward = twist.linear.x
+        left = twist.linear.y
         turn = twist.angular.z
+        print("Forward: " + str(forward) + " Left: " + str(left) + " Turn: " + str(turn))
+        print('\n')
+
+        print("---Angular Movement---")
+        self.sem.acquire()
+        self.controller.yaw(turn)
+        time.sleep(5)
+        self.sem.release()
+
+        print('---Linear Movement---')
+        self.sem.acquire()
+        self.controller.move(x=forward, y=left, z=0)
+        time.sleep(5)
+        self.sem.release()
+
+
+
+
 
 
 
@@ -127,7 +150,7 @@ def main(args=None):
         pass
     
     finally:
-        mallanoo_agent.cmd_vel_pub.publish(Twist())
+        #mallanoo_agent.cmd_vel_pub.publish(Twist())
         rclpy.try_shutdown()
 
     mallanoo_agent.destroy_node()
