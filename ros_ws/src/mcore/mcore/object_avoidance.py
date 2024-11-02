@@ -5,6 +5,8 @@ import math
 import time
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
+from nav_msgs.msg import Odometry
+from scipy.spatial.transform import Rotation as R
 import threading
 import sys
 
@@ -19,10 +21,11 @@ class Obeject_Avoidance(Node):
             LaserScan, "scan", self.scan_cb, 10
         )
 
-        # self.odom_sub = self.create_subscription(
-        #     Odomertry, "odom_rf2o", self.scan_cb, 10
-        # )
+        self.odom_sub = self.create_subscription(
+            Odometry, "odom_rf2o", self.odom_cb, 10
+        )
 
+        self.current_heading = 0
         self.out = Twist()
 
         #Initialize Publisher
@@ -30,14 +33,30 @@ class Obeject_Avoidance(Node):
         self.cmd_vel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
         self.pub_timer = self.create_timer(1 / 20, self.publish)
 
-        print("Test")
+        # print("Test")
 
     
+    def odom_cb(self, msg):
+
+        orientation_q = msg.pose.pose.orientation
+        quaternion = (
+            orientation_q.x,
+            orientation_q.y,
+            orientation_q.z,
+            orientation_q.w
+        ) 
+
+        r = R.from_quat(quaternion)
+        roll, pitch, yaw = r.as_euler('xyz', degrees=False)
+
+        self.current_heading = math.degrees(yaw)
+        print("Heading: ", self.current_heading)
+
 
 
     def scan_cb(self, laser_2D_scan):
         current_2D_scan = laser_2D_scan.ranges
-        current_heading = 0
+        current_heading = self.current_heading
         avoidance_vector_x = 0
         avoidance_vector_y = 0
         avoid = False
